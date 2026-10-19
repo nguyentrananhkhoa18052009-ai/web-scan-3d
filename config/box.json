@@ -1,0 +1,17 @@
+{
+  "box_dim_cm": {
+    "x": 30.0,
+    "y": 30.0,
+    "z": 30.0
+  },
+  "grid_step_cm": 3.0,
+  "camera_index": 0,
+  "homography_matrix": null,
+  "calibration_points_pixel": null,
+  "detection_params": {
+    "min_contour_area_px": 500,
+    "max_contour_area_px": 150000,
+    "bg_threshold": 30,
+    "blur_ksize": 5
+  }
+}

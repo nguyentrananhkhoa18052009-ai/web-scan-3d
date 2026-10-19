@@ -1,0 +1,38 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+body { background: #0f172a; color: #f8fafc; padding: 16px; }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.dashboard-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 16px; }
+.card { background: #1e293b; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.video-container { 
+  position: relative; 
+  width: 100%; 
+  background: #000; 
+  border-radius: 4px; 
+  overflow: hidden; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#videoStream { 
+  width: 100%; 
+  height: auto; 
+  display: block;
+}#overlayCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+button, select, .btn-upload { background: #334155; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 0.9rem; }
+.btn-primary { background: #0284c7; }
+.btn-upload { background: #8b5cf6; display: inline-block; }
+.coords-display { display: flex; justify-content: space-around; background: #0f172a; padding: 12px; border-radius: 6px; }
+.coord-item b { font-size: 1.2rem; color: #38bdf8; display: block; }
+.table-container { height: 150px; overflow-y: auto; background: #0f172a; }
+table { width: 100%; font-size: 0.8rem; text-align: left; }
+#threeContainer { width: 100%; height: 300px; background: #000; border-radius: 4px; }
+.tag { padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+.tag-ok { color: #22c55e; } .tag-warn { color: #f59e0b; } .tag-err { color: #ef4444; }
+
+/* Chi dan tung buoc hieu chuan */
+.calib-instruction-box { background: #0f172a; padding: 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #334155; }
+.calib-instruction-box h3 { font-size: 0.85rem; color: #38bdf8; margin-bottom: 6px; }
+.step-highlight { font-weight: bold; color: #f59e0b; margin-bottom: 6px; }
+.step-list { list-style: none; margin-bottom: 8px; }
+.step-list li { margin-bottom: 4px; color: #94a3b8; transition: color 0.2s; }
