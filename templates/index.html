@@ -3,241 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Box Coordinate Scanner</title>
+  <title>Box Coordinate Scanner</title>
+  
+  <!-- Nạp nguyên vẹn file định dạng CSS gốc của ông -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 12px;
-      min-height: 100vh;
-    }
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: #38bdf8;
-      text-align: center;
-    }
-    p.subtitle {
-      font-size: 0.9rem;
-      color: #94a3b8;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    .scanner-container {
+    /* Bổ sung hiển thị webcam tương thích với Render */
+    .camera-box-stream {
       position: relative;
       width: 100%;
-      max-width: 560px;
-      aspect-ratio: 4 / 3;
-      background-color: #020617;
-      border-radius: 12px;
+      max-width: 640px;
+      margin: 0 auto;
       overflow: hidden;
-      border: 2px solid #334155;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-    }
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .crosshair {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 40px;
-      height: 40px;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      border: 2px dashed #38bdf8;
-      border-radius: 50%;
-    }
-    .controls {
-      display: flex;
-      gap: 12px;
-      margin-top: 16px;
-      width: 100%;
-      max-width: 560px;
-    }
-    button {
-      flex: 1;
-      padding: 12px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      border: none;
       border-radius: 8px;
-      cursor: pointer;
-      background-color: #2563eb;
-      color: white;
-      transition: background 0.2s;
     }
-    button:hover {
-      background-color: #1d4ed8;
-    }
-    button.secondary {
-      background-color: #334155;
-    }
-    button.secondary:hover {
-      background-color: #475569;
-    }
-    .data-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+    #webcam-view {
       width: 100%;
-      max-width: 560px;
-      margin-top: 16px;
-    }
-    .card {
-      background-color: #1e293b;
-      padding: 14px;
-      border-radius: 10px;
-      text-align: center;
-      border: 1px solid #334155;
-    }
-    .card-label {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #94a3b8;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-    .card-value {
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #f1f5f9;
-      font-family: monospace;
-    }
-    .status-box {
-      margin-top: 16px;
-      padding: 12px 16px;
-      background-color: #1e293b;
+      height: auto;
+      display: block;
       border-radius: 8px;
-      width: 100%;
-      max-width: 560px;
-      font-size: 0.85rem;
-      color: #cbd5e1;
-      text-align: center;
-      border-left: 4px solid #38bdf8;
     }
   </style>
 </head>
 <body>
 
-  <h1>HỆ THỐNG QUÉT TỌA ĐỘ 3D</h1>
-  <p class="subtitle">Truyền hình ảnh từ Camera thiết bị về máy chủ Render</p>
-
-  <div class="scanner-container">
-    <video id="camera-stream" autoplay playsinline muted></video>
-    <div class="crosshair"></div>
-  </div>
-
-  <canvas id="capture-canvas" style="display: none;"></canvas>
-
-  <div class="controls">
-    <button id="btn-toggle-cam" onclick="toggleCamera()">Đổi Camera</button>
-  </div>
-
-  <div class="data-cards">
-    <div class="card">
-      <div class="card-label">Tọa độ X (cm)</div>
-      <div id="val-x" class="card-value">0.00</div>
+  <header class="header">
+    <div class="header-container">
+      <h1>HỆ THỐNG ĐO TỌA ĐỘ VẬT THỂ 3D</h1>
+      <p id="system-status">Trạng thái: Đang kết nối máy chủ...</p>
     </div>
-    <div class="card">
-      <div class="card-label">Tọa độ Y (cm)</div>
-      <div id="val-y" class="card-value">0.00</div>
-    </div>
-    <div class="card">
-      <div class="card-label">Tọa độ Z (cm)</div>
-      <div id="val-z" class="card-value">0.00</div>
-    </div>
-  </div>
+  </header>
 
-  <div id="status-text" class="status-box">Đang khởi tạo camera...</div>
+  <main class="main-content">
+    <section class="camera-section">
+      <div class="camera-box-stream">
+        <video id="webcam-view" autoplay playsinline muted></video>
+        <canvas id="hidden-canvas" style="display: none;"></canvas>
+      </div>
+      <div class="camera-tools" style="text-align: center; margin-top: 10px;">
+        <button id="btn-switch-camera" class="btn">Đổi Camera</button>
+      </div>
+    </section>
 
+    <section class="dashboard-section">
+      <div class="data-panel">
+        <div class="metric-card">
+          <span class="label">Tọa độ X</span>
+          <span id="coord-x" class="val">0.00</span>
+          <span class="unit">cm</span>
+        </div>
+        <div class="metric-card">
+          <span class="label">Tọa độ Y</span>
+          <span id="coord-y" class="val">0.00</span>
+          <span class="unit">cm</span>
+        </div>
+        <div class="metric-card">
+          <span class="label">Tọa độ Z</span>
+          <span id="coord-z" class="val">0.00</span>
+          <span class="unit">cm</span>
+        </div>
+      </div>
+      <div id="log-status" class="status-alert">Đang khởi tạo luồng camera...</div>
+    </section>
+  </main>
+
+  <!-- Nạp file JS điều khiển gốc của dự án nếu có -->
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <script src="/dashboard.js"></script>
+
+  <!-- Script kích hoạt Webcam máy khách và truyền dữ liệu về Render -->
   <script>
-    const video = document.getElementById('camera-stream');
-    const canvas = document.getElementById('capture-canvas');
-    const ctx = canvas.getContext('2d');
-    const statusText = document.getElementById('status-text');
+    const videoElem = document.getElementById('webcam-view');
+    const hiddenCanvas = document.getElementById('hidden-canvas');
+    const hCtx = hiddenCanvas.getContext('2d');
+    const logBox = document.getElementById('log-status');
+    const sysStatus = document.getElementById('system-status');
+    const txtX = document.getElementById('coord-x');
+    const txtY = document.getElementById('coord-y');
+    const txtZ = document.getElementById('coord-z');
 
-    const valX = document.getElementById('val-x');
-    const valY = document.getElementById('val-y');
-    const valZ = document.getElementById('val-z');
+    let camStream = null;
+    let cameraMode = "environment";
+    let sending = false;
 
-    let currentStream = null;
-    let useFacingMode = "environment";
-    let isProcessing = false;
-
-    // 1. Mở camera từ thiết bị người dùng
-    async function startCamera() {
-      if (currentStream) {
-        currentStream.getTracks().forEach(track => track.stop());
+    async function initClientCam() {
+      if (camStream) {
+        camStream.getTracks().forEach(t => t.stop());
       }
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: useFacingMode, width: { ideal: 640 }, height: { ideal: 480 } },
-          audio: false
+          video: { facingMode: cameraMode, width: { ideal: 640 }, height: { ideal: 480 } }
         });
-        currentStream = stream;
-        video.srcObject = stream;
-        statusText.innerText = "Camera sẵn sàng. Đang truyền dữ liệu...";
+        camStream = stream;
+        videoElem.srcObject = stream;
+        sysStatus.innerText = "Trạng thái: Đã kết nối Webcam thiết bị";
+        logBox.innerText = "Sẵn sàng gửi khung hình đến thuật toán 3D...";
       } catch (err) {
-        statusText.innerText = "Lỗi quyền camera: " + err.message;
+        sysStatus.innerText = "Trạng thái: Lỗi cấp quyền Camera";
+        logBox.innerText = "Vui lòng cho phép trình duyệt truy cập camera: " + err.message;
       }
     }
 
-    // 2. Nút chuyển đổi camera trước/sau
-    function toggleCamera() {
-      useFacingMode = useFacingMode === "environment" ? "user" : "environment";
-      startCamera();
-    }
+    document.getElementById('btn-switch-camera').addEventListener('click', () => {
+      cameraMode = cameraMode === "environment" ? "user" : "environment";
+      initClientCam();
+    });
 
-    // 3. Chụp và gửi khung hình về Render
-    async function sendFrame() {
-      if (!currentStream || isProcessing || video.videoWidth === 0) return;
+    async function sendScanFrame() {
+      if (!camStream || sending || videoElem.videoWidth === 0) return;
+      sending = true;
 
-      isProcessing = true;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      hiddenCanvas.width = videoElem.videoWidth;
+      hiddenCanvas.height = videoElem.videoHeight;
+      hCtx.drawImage(videoElem, 0, 0);
 
-      // Nén ảnh chất lượng 0.55 để truyền siêu tốc qua mạng
-      const base64Image = canvas.toDataURL('image/jpeg', 0.55);
+      const b64 = hiddenCanvas.toDataURL('image/jpeg', 0.55);
 
       try {
-        const response = await fetch('/api/scan', {
+        const res = await fetch('/api/scan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: base64Image })
+          body: JSON.stringify({ image: b64 })
         });
-        const result = await response.json();
-
-        if (result.success && result.coordinates) {
-          valX.innerText = Number(result.coordinates.x).toFixed(2);
-          valY.innerText = Number(result.coordinates.y).toFixed(2);
-          valZ.innerText = Number(result.coordinates.z).toFixed(2);
-          statusText.innerText = result.message || "Đã nhận diện tọa độ";
+        const d = await res.json();
+        if (d.success && d.coordinates) {
+          if (txtX) txtX.innerText = Number(d.coordinates.x).toFixed(2);
+          if (txtY) txtY.innerText = Number(d.coordinates.y).toFixed(2);
+          if (txtZ) txtZ.innerText = Number(d.coordinates.z).toFixed(2);
+          if (logBox) logBox.innerText = d.message || "Tọa độ cập nhật";
         }
-      } catch (err) {
-        statusText.innerText = "Mất kết nối máy chủ Render";
+      } catch (e) {
+        if (logBox) logBox.innerText = "Lỗi kết nối máy chủ Render";
       } finally {
-        isProcessing = false;
+        sending = false;
       }
     }
 
-    // Tự động khởi động camera và gửi dữ liệu mỗi 250ms
-    window.addEventListener('load', () => {
-      startCamera();
-      setInterval(sendFrame, 250);
+    window.addEventListener('DOMContentLoaded', () => {
+      initClientCam();
+      setInterval(sendScanFrame, 250);
     });
   </script>
 </body>
